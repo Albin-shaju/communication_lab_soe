@@ -1,0 +1,43 @@
+clc; clear all; close all;
+%-------------------------------------------------------------
+% M-ary PSK (M = 4, APSK)
+%-------------------------------------------------------------
+data=[0 0 1 1 0 1 1 0 0 0 1 0 0 1 1 1 0 1]; % message digital
+data
+fc1=3; % frequency of carrier in Hz
+fc2=6;
+fc3=9;
+fc4=12;
+T = 1; % symbol duration
+t=0:0.01:T;
+E = 1; % symbol energy
+n=[1 2 3 4]
+s1 = sqrt(2*E/T)*cos(2*pi*fc1*t); % signal s1(t)
+s2 = sqrt(2*E/T)*cos(2*pi*fc2*t); % signal s2(t)
+s3 = sqrt(2*E/T)*cos(2*pi*fc3*t); % signal s3(t)
+s4 = sqrt(2*E/T)*cos(2*pi*fc4*t); % signal s4(t)
+% symbol to signal mapping
+i = 1;
+ if (data(i)==0)&&(data(i+1)==0)
+ txs = s1;
+ elseif (data(i)==0)&&(data(i+1)==1)
+ txs = s2;
+ elseif (data(i)==1)&&(data(i+1)==0)
+ txs = s3;
+ elseif (data(i)==1)&&(data(i+1)==1)
+ txs = s4;
+ end
+% repeating for remaining data bits
+for i=3:2:length(data)
+ if (data(i)==0)&&(data(i+1)==0)
+ txs = [txs, s1];
+ elseif (data(i)==0)&&(data(i+1)==1)
+ txs = [txs, s2];
+ elseif (data(i)==1)&&(data(i+1)==0)
+ txs = [txs, s3];
+ elseif (data(i)==1)&&(data(i+1)==1)
+txs = [txs, s4];
+ end
+end
+plot(txs); xlabel('time t --->'); ylabel('txs'); title('M-ary
+FSK (M = 4)')
