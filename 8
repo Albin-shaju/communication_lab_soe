@@ -1,0 +1,81 @@
+clc; clear all; close all;
+%-------------------------------------------------------------
+% 07-02-2022 COMMUNICATION LAB
+% Line Codes - Baseband Transmission
+%-------------------------------------------------------------
+data=[1,0,1,0,1,1,1,0,0]; % message digital data
+Tb = 1; % bit duration
+t=0:0.01:Tb;
+Eb = 1;
+% unipolar NRZ
+s1uNRZ = Eb*ones(1,length(t)); % signal s1(t)
+s2uNRZ = Eb*zeros(1,length(t)); % signal s2(t)
+% polar NRZ
+s1pNRZ = Eb*ones(1,length(t)); % signal s1(t)
+s2pNRZ = -Eb*ones(1,length(t)); % signal s2(t)
+% NRZi (NRZ inverted - differential encoding)
+s1NRZi = Eb*ones(1,length(t)); % signal s1(t)
+% HINT: invert s1 every data(i) == 1 i.e. s1NRZi = -s1NRZi
+% bipolar / AMI (alternate mark inversion)
+s1bip = Eb*ones(1,length(t)); % signal s1(t)
+s2bip = Eb*zeros(1,length(t)); % signal s2(t)
+% HINT: invert s1 every data(i) == 1 i.e. s1bip = -s1bip
+% manchester / split phase
+s1man = [(Eb/2)*ones(1,ceil(length(t)/2)),-
+(Eb/2)*ones(1,floor(length(t)/2))]; % signal s1(t)
+s2man = [-
+(Eb/2)*ones(1,ceil(length(t)/2)),(Eb/2)*ones(1,floor(length(t)
+/2))]; % signal s2(t)
+% symbol to signal mapping
+if(data(1) == 1) %for bit '1'
+ txs_uNRZ = s1uNRZ; % unipolar NRZ
+ txs_pNRZ = s1pNRZ; % polar NRZ
+ txs_NRZi = s1NRZi; % NRZi
+ txs_bip = s1bip; % bipolar
+ txs_man = s1man; % manchester / split phase
+elseif(data(1) == 0) %for bit '0'
+ txs_uNRZ = s2uNRZ; % unipolar NRZ
+ txs_pNRZ = s2pNRZ; % polar NRZ
+ txs_NRZi = s1NRZi; % NRZi------------(exception)
+ txs_bip = s2bip; % bipolar
+ txs_man = s2man; % manchester / split phase
+end
+% repeating for remaining data bits
+for i=2:length(data)
+ if(data(i) == 1) %for bit '1'
+ txs_uNRZ = [txs_uNRZ, s1uNRZ];
+ txs_pNRZ = [txs_pNRZ, s1pNRZ];
+ s1NRZi = -s1NRZi; % inverted
+ txs_NRZi = [txs_NRZi, s1NRZi];
+ s1bip = -s1bip; % inverted
+ txs_bip = [txs_bip, s1bip];
+ txs_man = [txs_man, s1man];
+ elseif(data(i) == 0) %for bit '0'
+ txs_uNRZ = [txs_uNRZ, s2uNRZ];
+ txs_pNRZ = [txs_pNRZ, s2pNRZ];
+ txs_NRZi = [txs_NRZi, s1NRZi]; % NRZi-----(exception)
+ txs_bip = [txs_bip, s2bip];
+ txs_man = [txs_man, s2man];
+ end
+end
+figure;
+subplot(5,1,1)
+plot(txs_uNRZ); axis([0,1000,-2,2]); xlabel('time t --->');
+ylabel('txs_uNRZ');
+title('unipolar NRZ')
+subplot(5,1,2)
+plot(txs_pNRZ); axis([0,1000,-2,2]); xlabel('time t --->');
+ylabel('txs_pNRZ');
+title('polar NRZ')
+subplot(5,1,3)
+plot(txs_NRZi); axis([0,1000,-2,2]); xlabel('time t --->');
+ylabel('txs_NRZi');
+title('NRZi (NRZ inverted - differential encoding)')
+subplot(5,1,4)
+plot(txs_bip); axis([0,1000,-2,2]); xlabel('time t --->');
+ylabel('txs_bip');
+title('bipolar / AMI (alternate mark inversion)')
+subplot(5,1,5)
+plot(txs_man); axis([0,1000,-2,2]); xlabel('time t --->');
+ylabel('txs_man');
+title('manchester / split phase')
